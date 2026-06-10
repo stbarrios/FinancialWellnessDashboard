@@ -62,11 +62,98 @@
     line-height: 1.6;
   }
 
+  /* API KEY SETUP SCREEN */
+  #setup-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .setup-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .setup-card h1 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+
+  .setup-card p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .setup-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-2);
+  }
+
+  .setup-card input[type=text] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: monospace;
+    background: var(--surface2);
+    color: var(--text);
+    margin-bottom: 6px;
+    outline: none;
+  }
+
+  .setup-card input[type=text]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-bg);
+  }
+
+  .setup-note { font-size: 12px; color: var(--text-3); margin-bottom: 1.25rem; }
+  .setup-note a { color: var(--blue); text-decoration: none; }
+  .setup-note a:hover { text-decoration: underline; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 10px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .security-note {
+    margin-top: 1.25rem;
+    padding: 12px 14px;
+    background: var(--amber-bg);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--amber);
+    line-height: 1.5;
+  }
+
+  /* MAIN DASHBOARD */
+  #dashboard { display: none; }
+
   header {
     border-bottom: 0.5px solid var(--border);
     padding: 0 2rem;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     height: 56px;
     background: var(--surface);
     position: sticky;
@@ -75,6 +162,32 @@
   }
 
   header h1 { font-size: 15px; font-weight: 600; }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  .api-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--green-bg);
+    color: var(--green);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .btn-ghost {
+    padding: 5px 12px;
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
 
   .main-layout {
     max-width: 1100px;
@@ -270,6 +383,99 @@
     transition: width 0.4s ease;
   }
 
+  /* AI ADVISOR */
+  .advisor-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .advisor-card h3 {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-bottom: 14px;
+  }
+
+  .advisor-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .advisor-btn {
+    padding: 7px 14px;
+    border: 0.5px solid var(--border-md);
+    border-radius: 20px;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-2);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .advisor-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--text-3); }
+  .advisor-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .advisor-output {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    min-height: 60px;
+    white-space: pre-wrap;
+    display: none;
+  }
+
+  .advisor-output.visible { display: block; }
+  .advisor-output.loading { color: var(--text-3); font-style: italic; }
+  .advisor-output.error { color: var(--red); }
+
+  .custom-ask {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .custom-ask input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    background: var(--surface2);
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+  }
+
+  .custom-ask input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-bg); }
+
+  .custom-ask button {
+    padding: 8px 16px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  .custom-ask button:hover { opacity: 0.8; }
+  .custom-ask button:disabled { opacity: 0.4; cursor: not-allowed; }
+
   /* Mobile overrides — placed last so they win the cascade over the base rules above */
   @media (max-width: 768px) {
     .main-layout { grid-template-columns: 1fr; padding: 1rem; gap: 1rem; }
@@ -277,17 +483,49 @@
     /* Not sticky on mobile: a tall pinned sidebar would let content scroll over it */
     .sidebar { position: static; top: auto; }
     /* 16px prevents iOS Safari from auto-zooming the page on input focus */
-    .input-group input[type=number] { font-size: 16px; padding: 9px 11px; }
+    .input-group input[type=number],
+    .setup-card input[type=text],
+    .custom-ask input { font-size: 16px; }
+    .input-group input[type=number] { padding: 9px 11px; }
     /* Stack the ring above the text so neither gets squeezed */
     .score-card { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
     .score-info p { max-width: none; }
+    /* Save header space on small screens */
+    .api-badge { display: none; }
+    .setup-card { padding: 1.5rem; }
   }
 </style>
 </head>
 <body>
 
+<!-- API KEY SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <h1>Financial Wellness Dashboard</h1>
+    <p>Enter your Anthropic API key to enable the AI advisor feature. Your key is stored only in your browser's local storage and never sent anywhere except directly to Anthropic's API.</p>
+
+    <label for="api-key-input">Anthropic API key</label>
+    <input type="text" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') saveKey()">
+    <p class="setup-note">
+      Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.
+    </p>
+
+    <button class="btn-primary" onclick="saveKey()">Open dashboard</button>
+
+    <div class="security-note">
+      ⚠ Keep this key private. Do not share this page or your key with others. If you deploy this to a public URL, anyone with access can use their own key — but never commit your key into the page.
+    </div>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="dashboard">
 <header>
   <h1>Financial Wellness Dashboard</h1>
+  <div class="header-right">
+    <span class="api-badge">AI advisor active</span>
+    <button class="btn-ghost" onclick="changeKey()">Change API key</button>
+  </div>
 </header>
 
 <div class="main-layout">
@@ -367,11 +605,65 @@
       </div>
     </div>
 
+    <!-- AI ADVISOR -->
+    <div class="advisor-card">
+      <h3>AI advisor</h3>
+      <div class="advisor-btns" id="advisor-btns">
+        <button class="advisor-btn" onclick="askAI('What should I prioritize to improve my financial health based on my current KPIs?')">Where to start?</button>
+        <button class="advisor-btn" onclick="askAI('How can I increase my savings rate given my current income and expenses?')">Boost savings rate</button>
+        <button class="advisor-btn" onclick="askAI('Am I on track for retirement? What should I be doing differently?')">Retirement check</button>
+        <button class="advisor-btn" onclick="askAI('How can I build passive income streams given my current financial situation?')">Build passive income</button>
+        <button class="advisor-btn" onclick="askAI('What is the fastest way to improve my net worth based on my numbers?')">Grow net worth</button>
+      </div>
+
+      <div id="advisor-output" class="advisor-output"></div>
+
+      <div class="custom-ask">
+        <input type="text" id="custom-question" placeholder="Ask anything about your finances…" onkeydown="if(event.key==='Enter') askCustom()">
+        <button id="ask-btn" onclick="askCustom()">Ask →</button>
+      </div>
+    </div>
+
   </main>
 </div>
+</div><!-- /#dashboard -->
 
 <script>
 let budgetChart = null;
+let currentKPIs = {};
+
+// ── API KEY MANAGEMENT ──────────────────────────────────────────────────────
+
+function getKey() { return localStorage.getItem('anthropic_api_key') || ''; }
+
+function saveKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    alert('That doesn\'t look like a valid Anthropic API key. It should start with sk-ant-');
+    return;
+  }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('api-key-input').value = '';
+  showDashboard();
+}
+
+function changeKey() {
+  localStorage.removeItem('anthropic_api_key');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+  document.getElementById('api-key-input').value = '';
+}
+
+function showDashboard() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  // Start collapsed on small screens so the dashboard is visible first
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    document.getElementById('numbers-body').classList.add('collapsed');
+    document.getElementById('numbers-toggle').setAttribute('aria-expanded', 'false');
+  }
+  recalc(); // render once the dashboard is visible so the chart sizes correctly
+}
 
 function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
 
@@ -413,6 +705,8 @@ function recalc() {
   const dti = income > 0 ? (debtpay / income) * 100 : 0;
   const pir = expenses > 0 ? (passive / expenses) * 100 : 0;
   const housingRatio = income > 0 ? (housing / income) * 100 : 0;
+
+  currentKPIs = { income, savings, expenses, assets, liabilities, passive, debtpay, credit, utilization, efund, housing, netWorth, savingsRate, efMonths, dti, pir, housingRatio };
 
   setKPI('kpi-nw', fmt(netWorth), netWorth >= 0 ? 'good' : 'bad', 'Assets minus liabilities', 'neutral');
   setKPI('kpi-sr', savingsRate.toFixed(1) + '%', rateClass(savingsRate, 20, 10),
@@ -515,13 +809,98 @@ function toggleNumbers() {
   btn.setAttribute('aria-expanded', String(!collapsed));
 }
 
-// Start collapsed on small screens so the dashboard is visible first
-if (window.matchMedia('(max-width: 768px)').matches) {
-  document.getElementById('numbers-body').classList.add('collapsed');
-  document.getElementById('numbers-toggle').setAttribute('aria-expanded', 'false');
+// ── AI ADVISOR ──────────────────────────────────────────────────────────────
+
+function buildContext() {
+  const k = currentKPIs;
+  return `Here are my current financial KPIs:
+- Monthly gross income: $${Math.round(k.income).toLocaleString()}
+- Monthly savings: $${Math.round(k.savings).toLocaleString()} (savings rate: ${k.savingsRate.toFixed(1)}%)
+- Monthly expenses: $${Math.round(k.expenses).toLocaleString()}
+- Monthly housing cost: $${Math.round(k.housing).toLocaleString()} (${k.housingRatio.toFixed(1)}% of income)
+- Monthly debt payments: $${Math.round(k.debtpay).toLocaleString()} (DTI: ${k.dti.toFixed(1)}%)
+- Total assets: $${Math.round(k.assets).toLocaleString()}
+- Total liabilities: $${Math.round(k.liabilities).toLocaleString()}
+- Net worth: $${Math.round(k.netWorth).toLocaleString()}
+- Emergency fund: $${Math.round(k.efund).toLocaleString()} (${k.efMonths.toFixed(1)} months of expenses)
+- Monthly passive income: $${Math.round(k.passive).toLocaleString()} (${k.pir.toFixed(1)}% of expenses)
+- Credit score: ${Math.round(k.credit)}
+- Credit utilization: ${k.utilization.toFixed(0)}%`;
 }
 
-recalc();
+function setAdvisorBusy(busy) {
+  document.querySelectorAll('.advisor-btn').forEach(b => b.disabled = busy);
+  document.getElementById('ask-btn').disabled = busy;
+}
+
+async function askAI(question) {
+  const output = document.getElementById('advisor-output');
+  const key = getKey();
+  if (!key) {
+    output.className = 'advisor-output visible error';
+    output.textContent = '⚠ No API key found. Click “Change API key” and enter your key.';
+    return;
+  }
+
+  output.className = 'advisor-output visible loading';
+  output.textContent = 'Thinking…';
+  setAdvisorBusy(true);
+
+  const prompt = `${buildContext()}\n\nQuestion: ${question}\n\nPlease give concise, actionable advice specific to my numbers. Be direct and practical. 3–5 short paragraphs max.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      if (response.status === 401) throw new Error('Invalid API key. Please check your key and try again.');
+      if (response.status === 429) throw new Error('Rate limit reached. Wait a moment and try again.');
+      throw new Error(err.error?.message || `API error ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'No response received.';
+    output.className = 'advisor-output visible';
+    output.textContent = text;
+
+  } catch (err) {
+    output.className = 'advisor-output visible error';
+    // A failed fetch with no status is usually the browser's CORS/network block
+    output.textContent = '⚠ ' + (err.message === 'Failed to fetch'
+      ? 'Could not reach the Anthropic API from the browser (network or CORS). Check your connection and key.'
+      : err.message);
+  } finally {
+    setAdvisorBusy(false);
+  }
+}
+
+function askCustom() {
+  const input = document.getElementById('custom-question');
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = '';
+  askAI(question);
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+// Show the dashboard immediately if a key is already stored; otherwise the
+// setup screen (visible by default) prompts for one.
+if (getKey()) {
+  showDashboard();
+}
 </script>
 </body>
 </html>
