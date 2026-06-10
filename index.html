@@ -116,6 +116,35 @@
     margin-bottom: 14px;
   }
 
+  .numbers-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+
+  .numbers-toggle .chevron { transition: transform 0.25s ease; flex-shrink: 0; }
+  .numbers-toggle[aria-expanded="false"] .chevron { transform: rotate(-90deg); }
+
+  .numbers-body {
+    overflow: hidden;
+    max-height: 1600px;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+  }
+
+  .numbers-body.collapsed { max-height: 0; opacity: 0; }
+
   .input-group { margin-bottom: 10px; }
 
   .input-group label {
@@ -263,21 +292,26 @@
 <div class="main-layout">
 
   <aside class="sidebar">
-    <h2>Your numbers</h2>
-    <div class="input-group"><label>Monthly gross income ($)</label><input type="number" id="income" value="8000" oninput="recalc()"></div>
-    <div class="input-group"><label>Monthly savings ($)</label><input type="number" id="savings" value="1600" oninput="recalc()"></div>
-    <div class="input-group"><label>Monthly expenses ($)</label><input type="number" id="expenses" value="5000" oninput="recalc()"></div>
-    <hr class="section-divider">
-    <div class="input-group"><label>Total assets ($)</label><input type="number" id="assets" value="120000" oninput="recalc()"></div>
-    <div class="input-group"><label>Total liabilities ($)</label><input type="number" id="liabilities" value="40000" oninput="recalc()"></div>
-    <div class="input-group"><label>Monthly passive income ($)</label><input type="number" id="passive" value="500" oninput="recalc()"></div>
-    <hr class="section-divider">
-    <div class="input-group"><label>Monthly debt payments ($)</label><input type="number" id="debtpay" value="800" oninput="recalc()"></div>
-    <div class="input-group"><label>Credit score</label><input type="number" id="credit" value="720" oninput="recalc()"></div>
-    <div class="input-group"><label>Credit utilization (%)</label><input type="number" id="utilization" value="18" oninput="recalc()"></div>
-    <hr class="section-divider">
-    <div class="input-group"><label>Emergency fund ($)</label><input type="number" id="efund" value="18000" oninput="recalc()"></div>
-    <div class="input-group"><label>Monthly housing cost ($)</label><input type="number" id="housing" value="1800" oninput="recalc()"></div>
+    <button class="numbers-toggle" id="numbers-toggle" aria-expanded="true" aria-controls="numbers-body" onclick="toggleNumbers()">
+      <span>Your numbers</span>
+      <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </button>
+    <div class="numbers-body" id="numbers-body">
+      <div class="input-group"><label>Monthly gross income ($)</label><input type="number" id="income" value="8000" oninput="recalc()"></div>
+      <div class="input-group"><label>Monthly savings ($)</label><input type="number" id="savings" value="1600" oninput="recalc()"></div>
+      <div class="input-group"><label>Monthly expenses ($)</label><input type="number" id="expenses" value="5000" oninput="recalc()"></div>
+      <hr class="section-divider">
+      <div class="input-group"><label>Total assets ($)</label><input type="number" id="assets" value="120000" oninput="recalc()"></div>
+      <div class="input-group"><label>Total liabilities ($)</label><input type="number" id="liabilities" value="40000" oninput="recalc()"></div>
+      <div class="input-group"><label>Monthly passive income ($)</label><input type="number" id="passive" value="500" oninput="recalc()"></div>
+      <hr class="section-divider">
+      <div class="input-group"><label>Monthly debt payments ($)</label><input type="number" id="debtpay" value="800" oninput="recalc()"></div>
+      <div class="input-group"><label>Credit score</label><input type="number" id="credit" value="720" oninput="recalc()"></div>
+      <div class="input-group"><label>Credit utilization (%)</label><input type="number" id="utilization" value="18" oninput="recalc()"></div>
+      <hr class="section-divider">
+      <div class="input-group"><label>Emergency fund ($)</label><input type="number" id="efund" value="18000" oninput="recalc()"></div>
+      <div class="input-group"><label>Monthly housing cost ($)</label><input type="number" id="housing" value="1800" oninput="recalc()"></div>
+    </div>
   </aside>
 
   <main class="content">
@@ -321,7 +355,7 @@
           <span><span class="legend-dot" style="background:#D4537E"></span>Debt</span>
           <span><span class="legend-dot" style="background:#EF9F27"></span>Other</span>
         </div>
-        <div style="position:relative; height:200px;">
+        <div style="position:relative; height:200px; width:100%; overflow:hidden;">
           <canvas id="budgetChart" role="img" aria-label="Doughnut chart showing monthly budget split.">Budget breakdown.</canvas>
         </div>
       </div>
@@ -471,6 +505,19 @@ function renderChart() {
       }
     }
   });
+}
+
+function toggleNumbers() {
+  const body = document.getElementById('numbers-body');
+  const btn = document.getElementById('numbers-toggle');
+  const collapsed = body.classList.toggle('collapsed');
+  btn.setAttribute('aria-expanded', String(!collapsed));
+}
+
+// Start collapsed on small screens so the dashboard is visible first
+if (window.matchMedia('(max-width: 768px)').matches) {
+  document.getElementById('numbers-body').classList.add('collapsed');
+  document.getElementById('numbers-toggle').setAttribute('aria-expanded', 'false');
 }
 
 recalc();
