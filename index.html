@@ -62,92 +62,6 @@
     line-height: 1.6;
   }
 
-  /* API KEY SETUP SCREEN */
-  #setup-screen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-
-  .setup-card {
-    background: var(--surface);
-    border: 0.5px solid var(--border-md);
-    border-radius: var(--radius);
-    padding: 2.5rem;
-    max-width: 480px;
-    width: 100%;
-  }
-
-  .setup-card h1 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-
-  .setup-card p {
-    font-size: 14px;
-    color: var(--text-2);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-  }
-
-  .setup-card label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 6px;
-    color: var(--text-2);
-  }
-
-  .setup-card input[type=text] {
-    width: 100%;
-    padding: 10px 12px;
-    border: 0.5px solid var(--border-md);
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-family: monospace;
-    background: var(--surface2);
-    color: var(--text);
-    margin-bottom: 6px;
-    outline: none;
-  }
-
-  .setup-card input[type=text]:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px var(--blue-bg);
-  }
-
-  .setup-note { font-size: 12px; color: var(--text-3); margin-bottom: 1.25rem; }
-  .setup-note a { color: var(--blue); text-decoration: none; }
-  .setup-note a:hover { text-decoration: underline; }
-
-  .btn-primary {
-    width: 100%;
-    padding: 10px;
-    background: var(--text);
-    color: var(--bg);
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    transition: opacity 0.15s;
-  }
-
-  .btn-primary:hover { opacity: 0.85; }
-
-  .security-note {
-    margin-top: 1.25rem;
-    padding: 12px 14px;
-    background: var(--amber-bg);
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    color: var(--amber);
-    line-height: 1.5;
-  }
-
-  /* MAIN DASHBOARD */
-  #dashboard { display: none; }
-
   header {
     border-bottom: 0.5px solid var(--border);
     padding: 0 2rem;
@@ -400,6 +314,12 @@
     margin-bottom: 14px;
   }
 
+  /* Inline key setup, shown inside the advisor card when no key is stored */
+  .advisor-setup p { font-size: 13px; color: var(--text-2); margin-bottom: 10px; }
+  .setup-note { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+  .setup-note a { color: var(--blue); text-decoration: none; }
+  .setup-note a:hover { text-decoration: underline; }
+
   .advisor-btns {
     display: flex;
     flex-wrap: wrap;
@@ -484,7 +404,6 @@
     .sidebar { position: static; top: auto; }
     /* 16px prevents iOS Safari from auto-zooming the page on input focus */
     .input-group input[type=number],
-    .setup-card input[type=text],
     .custom-ask input { font-size: 16px; }
     .input-group input[type=number] { padding: 9px 11px; }
     /* Stack the ring above the text so neither gets squeezed */
@@ -492,37 +411,14 @@
     .score-info p { max-width: none; }
     /* Save header space on small screens */
     .api-badge { display: none; }
-    .setup-card { padding: 1.5rem; }
   }
 </style>
 </head>
 <body>
 
-<!-- API KEY SETUP SCREEN -->
-<div id="setup-screen">
-  <div class="setup-card">
-    <h1>Financial Wellness Dashboard</h1>
-    <p>Enter your Anthropic API key to enable the AI advisor feature. Your key is stored only in your browser's local storage and never sent anywhere except directly to Anthropic's API.</p>
-
-    <label for="api-key-input">Anthropic API key</label>
-    <input type="text" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') saveKey()">
-    <p class="setup-note">
-      Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.
-    </p>
-
-    <button class="btn-primary" onclick="saveKey()">Open dashboard</button>
-
-    <div class="security-note">
-      ⚠ Keep this key private. Do not share this page or your key with others. If you deploy this to a public URL, anyone with access can use their own key — but never commit your key into the page.
-    </div>
-  </div>
-</div>
-
-<!-- MAIN DASHBOARD -->
-<div id="dashboard">
 <header>
   <h1>Financial Wellness Dashboard</h1>
-  <div class="header-right">
+  <div class="header-right" id="header-right" style="display:none;">
     <span class="api-badge">AI advisor active</span>
     <button class="btn-ghost" onclick="changeKey()">Change API key</button>
   </div>
@@ -608,31 +504,47 @@
     <!-- AI ADVISOR -->
     <div class="advisor-card">
       <h3>AI advisor</h3>
-      <div class="advisor-btns" id="advisor-btns">
-        <button class="advisor-btn" onclick="askAI('What should I prioritize to improve my financial health based on my current KPIs?')">Where to start?</button>
-        <button class="advisor-btn" onclick="askAI('How can I increase my savings rate given my current income and expenses?')">Boost savings rate</button>
-        <button class="advisor-btn" onclick="askAI('Am I on track for retirement? What should I be doing differently?')">Retirement check</button>
-        <button class="advisor-btn" onclick="askAI('How can I build passive income streams given my current financial situation?')">Build passive income</button>
-        <button class="advisor-btn" onclick="askAI('What is the fastest way to improve my net worth based on my numbers?')">Grow net worth</button>
+
+      <!-- Shown when no API key is stored -->
+      <div class="advisor-setup" id="advisor-setup">
+        <p>Add your Anthropic API key to get personalized, AI-powered advice based on your numbers. The key is stored only in your browser and sent directly to Anthropic.</p>
+        <div class="custom-ask">
+          <input type="text" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') saveKey()">
+          <button onclick="saveKey()">Enable</button>
+        </div>
+        <p class="setup-note">
+          Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>. Keep it private — never commit it into the page.
+        </p>
       </div>
 
-      <div id="advisor-output" class="advisor-output"></div>
+      <!-- Shown when an API key is stored -->
+      <div id="advisor-main" style="display:none;">
+        <div class="advisor-btns" id="advisor-btns">
+          <button class="advisor-btn" onclick="askAI('What should I prioritize to improve my financial health based on my current KPIs?')">Where to start?</button>
+          <button class="advisor-btn" onclick="askAI('How can I increase my savings rate given my current income and expenses?')">Boost savings rate</button>
+          <button class="advisor-btn" onclick="askAI('Am I on track for retirement? What should I be doing differently?')">Retirement check</button>
+          <button class="advisor-btn" onclick="askAI('How can I build passive income streams given my current financial situation?')">Build passive income</button>
+          <button class="advisor-btn" onclick="askAI('What is the fastest way to improve my net worth based on my numbers?')">Grow net worth</button>
+        </div>
 
-      <div class="custom-ask">
-        <input type="text" id="custom-question" placeholder="Ask anything about your finances…" onkeydown="if(event.key==='Enter') askCustom()">
-        <button id="ask-btn" onclick="askCustom()">Ask →</button>
+        <div id="advisor-output" class="advisor-output"></div>
+
+        <div class="custom-ask">
+          <input type="text" id="custom-question" placeholder="Ask anything about your finances…" onkeydown="if(event.key==='Enter') askCustom()">
+          <button id="ask-btn" onclick="askCustom()">Ask →</button>
+        </div>
       </div>
     </div>
 
   </main>
 </div>
-</div><!-- /#dashboard -->
 
 <script>
 let budgetChart = null;
 let currentKPIs = {};
 
 // ── API KEY MANAGEMENT ──────────────────────────────────────────────────────
+// The dashboard is always usable; the API key only gates the AI advisor card.
 
 function getKey() { return localStorage.getItem('anthropic_api_key') || ''; }
 
@@ -644,25 +556,21 @@ function saveKey() {
   }
   localStorage.setItem('anthropic_api_key', key);
   document.getElementById('api-key-input').value = '';
-  showDashboard();
+  refreshAdvisorState();
 }
 
 function changeKey() {
   localStorage.removeItem('anthropic_api_key');
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'flex';
   document.getElementById('api-key-input').value = '';
+  refreshAdvisorState();
 }
 
-function showDashboard() {
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  // Start collapsed on small screens so the dashboard is visible first
-  if (window.matchMedia('(max-width: 768px)').matches) {
-    document.getElementById('numbers-body').classList.add('collapsed');
-    document.getElementById('numbers-toggle').setAttribute('aria-expanded', 'false');
-  }
-  recalc(); // render once the dashboard is visible so the chart sizes correctly
+// Toggle the advisor card between its key-setup state and its active state.
+function refreshAdvisorState() {
+  const hasKey = !!getKey();
+  document.getElementById('advisor-setup').style.display = hasKey ? 'none' : 'block';
+  document.getElementById('advisor-main').style.display = hasKey ? 'block' : 'none';
+  document.getElementById('header-right').style.display = hasKey ? 'flex' : 'none';
 }
 
 function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
@@ -896,11 +804,14 @@ function askCustom() {
 }
 
 // ── INIT ────────────────────────────────────────────────────────────────────
-// Show the dashboard immediately if a key is already stored; otherwise the
-// setup screen (visible by default) prompts for one.
-if (getKey()) {
-  showDashboard();
+// Start collapsed on small screens so the dashboard is visible first
+if (window.matchMedia('(max-width: 768px)').matches) {
+  document.getElementById('numbers-body').classList.add('collapsed');
+  document.getElementById('numbers-toggle').setAttribute('aria-expanded', 'false');
 }
+
+refreshAdvisorState();
+recalc();
 </script>
 </body>
 </html>
