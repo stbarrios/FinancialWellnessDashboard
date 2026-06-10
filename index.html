@@ -205,6 +205,9 @@
     overflow: hidden;
   }
 
+  /* Hard cap so the DPR-scaled canvas backing buffer can never widen the layout */
+  .chart-card canvas { max-width: 100%; }
+
   .chart-card h3 {
     font-size: 12px;
     font-weight: 500;
