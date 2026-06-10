@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Wellness Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --surface2: #f1efe9;
+    --border: rgba(0,0,0,0.09);
+    --border-md: rgba(0,0,0,0.15);
+    --text: #1a1a18;
+    --text-2: #5c5c57;
+    --text-3: #9a9991;
+    --green: #1D9E75;
+    --green-bg: #e1f5ee;
+    --amber: #BA7517;
+    --amber-bg: #faeeda;
+    --red: #E24B4A;
+    --red-bg: #fcebeb;
+    --blue: #185FA5;
+    --blue-bg: #e6f1fb;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #181816;
+      --surface: #222220;
+      --surface2: #2a2a27;
+      --border: rgba(255,255,255,0.08);
+      --border-md: rgba(255,255,255,0.14);
+      --text: #f0ede6;
+      --text-2: #a8a49c;
+      --text-3: #68655e;
+      --green: #3ecf9a;
+      --green-bg: #0d3326;
+      --amber: #f0aa40;
+      --amber-bg: #2e1f05;
+      --red: #f07070;
+      --red-bg: #2e0f0f;
+      --blue: #5ea8e8;
+      --blue-bg: #0c2a45;
+    }
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  header {
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  header h1 { font-size: 15px; font-weight: 600; }
+
+  .main-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .main-layout { grid-template-columns: 1fr; padding: 1rem; }
+    header { padding: 0 1rem; }
+  }
+
+  .sidebar {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    position: sticky;
+    top: 72px;
+  }
+
+  .sidebar h2 {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .input-group { margin-bottom: 10px; }
+
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 4px;
+  }
+
+  .input-group input[type=number] {
+    width: 100%;
+    padding: 7px 10px;
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    background: var(--surface2);
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+  }
+
+  .input-group input[type=number]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px var(--blue-bg);
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 14px 0;
+  }
+
+  .content { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .score-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .score-ring-wrap { flex-shrink: 0; }
+
+  .score-info h2 { font-size: 22px; font-weight: 600; margin-bottom: 2px; }
+  .score-info p { font-size: 13px; color: var(--text-2); max-width: 340px; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .kpi-label { font-size: 11px; color: var(--text-3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .kpi-value { font-size: 20px; font-weight: 600; }
+  .kpi-note { font-size: 11px; margin-top: 3px; }
+  .good { color: var(--green); }
+  .warn { color: var(--amber); }
+  .bad { color: var(--red); }
+  .neutral { color: var(--text-2); }
+
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 600px) { .charts-row { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .chart-card h3 {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-bottom: 14px;
+  }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: var(--text-2);
+  }
+
+  .chart-legend span { display: flex; align-items: center; gap: 5px; }
+
+  .legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+  .gauge-item { margin-bottom: 12px; }
+
+  .gauge-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 5px;
+  }
+
+  .gauge-track {
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Financial Wellness Dashboard</h1>
+</header>
+
+<div class="main-layout">
+
+  <aside class="sidebar">
+    <h2>Your numbers</h2>
+    <div class="input-group"><label>Monthly gross income ($)</label><input type="number" id="income" value="8000" oninput="recalc()"></div>
+    <div class="input-group"><label>Monthly savings ($)</label><input type="number" id="savings" value="1600" oninput="recalc()"></div>
+    <div class="input-group"><label>Monthly expenses ($)</label><input type="number" id="expenses" value="5000" oninput="recalc()"></div>
+    <hr class="section-divider">
+    <div class="input-group"><label>Total assets ($)</label><input type="number" id="assets" value="120000" oninput="recalc()"></div>
+    <div class="input-group"><label>Total liabilities ($)</label><input type="number" id="liabilities" value="40000" oninput="recalc()"></div>
+    <div class="input-group"><label>Monthly passive income ($)</label><input type="number" id="passive" value="500" oninput="recalc()"></div>
+    <hr class="section-divider">
+    <div class="input-group"><label>Monthly debt payments ($)</label><input type="number" id="debtpay" value="800" oninput="recalc()"></div>
+    <div class="input-group"><label>Credit score</label><input type="number" id="credit" value="720" oninput="recalc()"></div>
+    <div class="input-group"><label>Credit utilization (%)</label><input type="number" id="utilization" value="18" oninput="recalc()"></div>
+    <hr class="section-divider">
+    <div class="input-group"><label>Emergency fund ($)</label><input type="number" id="efund" value="18000" oninput="recalc()"></div>
+    <div class="input-group"><label>Monthly housing cost ($)</label><input type="number" id="housing" value="1800" oninput="recalc()"></div>
+  </aside>
+
+  <main class="content">
+
+    <div class="score-card">
+      <div class="score-ring-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border-md)" stroke-width="9"/>
+          <circle cx="50" cy="50" r="40" fill="none" id="score-arc"
+            stroke="#1D9E75" stroke-width="9"
+            stroke-dasharray="0 251"
+            stroke-linecap="round"
+            transform="rotate(-90 50 50)"/>
+          <text x="50" y="56" text-anchor="middle" font-size="20" font-weight="600" fill="var(--text)" font-family="Inter,sans-serif" id="score-num">—</text>
+        </svg>
+      </div>
+      <div class="score-info">
+        <div style="font-size:11px; font-weight:500; letter-spacing:0.06em; color:var(--text-3); text-transform:uppercase; margin-bottom:6px;">Overall wellness score</div>
+        <h2 id="score-label">—</h2>
+        <p id="score-tip"></p>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Net worth</div><div class="kpi-value neutral" id="kpi-nw">—</div><div class="kpi-note neutral" id="kpi-nw-note">Assets minus liabilities</div></div>
+      <div class="kpi-card"><div class="kpi-label">Savings rate</div><div class="kpi-value" id="kpi-sr">—</div><div class="kpi-note" id="kpi-sr-note">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Emergency fund</div><div class="kpi-value" id="kpi-ef">—</div><div class="kpi-note" id="kpi-ef-note">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Debt-to-income</div><div class="kpi-value" id="kpi-dti">—</div><div class="kpi-note" id="kpi-dti-note">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passive income ratio</div><div class="kpi-value" id="kpi-pir">—</div><div class="kpi-note" id="kpi-pir-note">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Housing ratio</div><div class="kpi-value" id="kpi-hr">—</div><div class="kpi-note" id="kpi-hr-note">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Credit score</div><div class="kpi-value" id="kpi-cs">—</div><div class="kpi-note" id="kpi-cs-note">—</div></div>
+      <div class="kpi-card"><div class="kpi-label">Credit utilization</div><div class="kpi-value" id="kpi-cu">—</div><div class="kpi-note" id="kpi-cu-note">—</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>Budget breakdown</h3>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:#1D9E75"></span>Savings</span>
+          <span><span class="legend-dot" style="background:#378ADD"></span>Housing</span>
+          <span><span class="legend-dot" style="background:#D4537E"></span>Debt</span>
+          <span><span class="legend-dot" style="background:#EF9F27"></span>Other</span>
+        </div>
+        <div style="position:relative; height:200px;">
+          <canvas id="budgetChart" role="img" aria-label="Doughnut chart showing monthly budget split.">Budget breakdown.</canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>KPI gauges</h3>
+        <div id="gauge-bars" style="margin-top:4px;"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let budgetChart = null;
+
+function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function fmt(n) {
+  if (Math.abs(n) >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return '$' + Math.round(n / 1000) + 'k';
+  return '$' + Math.round(n);
+}
+
+function rateClass(val, good, warn) {
+  if (val >= good) return 'good';
+  if (val >= warn) return 'warn';
+  return 'bad';
+}
+
+function lowGoodClass(val, good, warn) {
+  if (val <= good) return 'good';
+  if (val <= warn) return 'warn';
+  return 'bad';
+}
+
+function setKPI(id, val, valClass, note, noteClass) {
+  const el = document.getElementById(id);
+  el.textContent = val;
+  el.className = 'kpi-value ' + valClass;
+  const noteEl = document.getElementById(id + '-note');
+  if (noteEl) { noteEl.textContent = note; noteEl.className = 'kpi-note ' + noteClass; }
+}
+
+function recalc() {
+  const income = v('income'), savings = v('savings'), expenses = v('expenses');
+  const assets = v('assets'), liabilities = v('liabilities'), passive = v('passive');
+  const debtpay = v('debtpay'), credit = v('credit'), utilization = v('utilization');
+  const efund = v('efund'), housing = v('housing');
+
+  const netWorth = assets - liabilities;
+  const savingsRate = income > 0 ? (savings / income) * 100 : 0;
+  const efMonths = expenses > 0 ? efund / expenses : 0;
+  const dti = income > 0 ? (debtpay / income) * 100 : 0;
+  const pir = expenses > 0 ? (passive / expenses) * 100 : 0;
+  const housingRatio = income > 0 ? (housing / income) * 100 : 0;
+
+  setKPI('kpi-nw', fmt(netWorth), netWorth >= 0 ? 'good' : 'bad', 'Assets minus liabilities', 'neutral');
+  setKPI('kpi-sr', savingsRate.toFixed(1) + '%', rateClass(savingsRate, 20, 10),
+    savingsRate >= 20 ? '✓ Strong (target ≥20%)' : savingsRate >= 10 ? '⚠ Aim for 20%+' : '✗ Below 10%', rateClass(savingsRate, 20, 10));
+  setKPI('kpi-ef', efMonths.toFixed(1) + ' mo', rateClass(efMonths, 3, 1),
+    efMonths >= 6 ? '✓ Excellent (6+ mo)' : efMonths >= 3 ? '✓ Good (3–6 mo)' : efMonths >= 1 ? '⚠ Build to 3 mo' : '✗ Critical gap', rateClass(efMonths, 3, 1));
+  setKPI('kpi-dti', dti.toFixed(1) + '%', lowGoodClass(dti, 36, 50),
+    dti <= 20 ? '✓ Excellent (<20%)' : dti <= 36 ? '✓ Healthy (<36%)' : dti <= 50 ? '⚠ High debt load' : '✗ Dangerously high', lowGoodClass(dti, 36, 50));
+  setKPI('kpi-pir', pir.toFixed(1) + '%', rateClass(pir, 50, 10),
+    pir >= 100 ? '✓ Financially independent!' : pir >= 50 ? '✓ Strong passive income' : pir >= 10 ? '⚠ Keep building' : '⚠ Early stage', rateClass(pir, 50, 10));
+  setKPI('kpi-hr', housingRatio.toFixed(1) + '%', lowGoodClass(housingRatio, 28, 36),
+    housingRatio <= 28 ? '✓ Healthy (<28%)' : housingRatio <= 36 ? '⚠ Bit high (aim <28%)' : '✗ Above 36%', lowGoodClass(housingRatio, 28, 36));
+  setKPI('kpi-cs', Math.round(credit), rateClass(credit, 740, 670),
+    credit >= 800 ? '✓ Exceptional' : credit >= 740 ? '✓ Very good' : credit >= 670 ? '⚠ Good, room to grow' : '✗ Needs work', rateClass(credit, 740, 670));
+  setKPI('kpi-cu', utilization.toFixed(0) + '%', lowGoodClass(utilization, 10, 30),
+    utilization <= 10 ? '✓ Excellent (<10%)' : utilization <= 30 ? '⚠ Okay (<30%)' : '✗ Too high', lowGoodClass(utilization, 10, 30));
+
+  let score = 0;
+  if (netWorth > 0) score += 10;
+  score += Math.min(20, (savingsRate / 20) * 20);
+  score += Math.min(15, (efMonths / 6) * 15);
+  score += Math.max(0, 15 - ((Math.max(0, dti - 20) / 80) * 15));
+  score += Math.min(10, (pir / 100) * 10);
+  score += Math.max(0, 10 - ((Math.max(0, housingRatio - 28) / 22) * 10));
+  score += Math.min(10, ((Math.max(0, credit - 580)) / 270) * 10);
+  score += Math.max(0, 10 - ((utilization / 100) * 10));
+  score = Math.min(100, Math.round(score));
+
+  document.getElementById('score-num').textContent = score;
+  const arc = document.getElementById('score-arc');
+  const circ = 2 * Math.PI * 40;
+  arc.setAttribute('stroke-dasharray', (circ * score / 100).toFixed(1) + ' ' + circ.toFixed(1));
+  arc.setAttribute('stroke', score >= 75 ? '#1D9E75' : score >= 50 ? '#EF9F27' : '#E24B4A');
+
+  const tiers = [, 'Needs attention', 'Building foundation', 'Making progress', 'Strong financial health', 'Excellent — keep it up!'];
+  const tips = [, 'Focus on emergency fund and cutting high-interest debt first.', 'Build your emergency fund and push savings rate above 20%.', 'You\'re on a solid path — invest more and grow passive income.', 'Optimize investments and accelerate passive income growth.', 'Financially fit. Diversify, protect, and keep compounding.'];
+  const tier = score < 20 ? 1 : score < 40 ? 2 : score < 60 ? 3 : score < 80 ? 4 : 5;
+  const lbl = document.getElementById('score-label');
+  lbl.textContent = tiers[tier];
+  lbl.style.color = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('score-tip').textContent = tips[tier];
+
+  const gauges = [
+    { label: 'Savings rate', pct: Math.min(100, savingsRate), target: 20, higher: true, rawLabel: savingsRate.toFixed(1) + '%' },
+    { label: 'Emergency fund', pct: Math.min(100, efMonths * (100/6)), target: 50, higher: true, rawLabel: efMonths.toFixed(1) + ' mo' },
+    { label: 'Debt-to-income ↓', pct: Math.min(100, dti), target: 36, higher: false, rawLabel: dti.toFixed(1) + '%' },
+    { label: 'Passive income ratio', pct: Math.min(100, pir), target: 100, higher: true, rawLabel: pir.toFixed(1) + '%' },
+    { label: 'Housing ratio ↓', pct: Math.min(100, housingRatio), target: 28, higher: false, rawLabel: housingRatio.toFixed(1) + '%' },
+  ];
+
+  document.getElementById('gauge-bars').innerHTML = gauges.map(g => {
+    const good = g.higher ? g.pct >= g.target : g.pct <= g.target;
+    const color = good ? 'var(--green)' : g.pct > 0 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="gauge-item">
+      <div class="gauge-header"><span>${g.label}</span><span style="color:${color}; font-weight:500;">${g.rawLabel}</span></div>
+      <div class="gauge-track"><div class="gauge-fill" style="width:${g.pct.toFixed(0)}%; background:${color};"></div></div>
+    </div>`;
+  }).join('');
+
+  renderChart();
+}
+
+function renderChart() {
+  const income = v('income'), savings = v('savings'), housing = v('housing'), debtpay = v('debtpay');
+  const other = Math.max(0, income - savings - housing - debtpay);
+  const canvas = document.getElementById('budgetChart');
+  if (!canvas) return;
+  if (budgetChart) { budgetChart.destroy(); budgetChart = null; }
+  budgetChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Savings', 'Housing', 'Debt payments', 'Other expenses'],
+      datasets: [{
+        data: [Math.max(0, savings), Math.max(0, housing), Math.max(0, debtpay), Math.max(0, other)],
+        backgroundColor: ['#1D9E75', '#378ADD', '#D4537E', '#EF9F27'],
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' $' + Math.round(ctx.raw).toLocaleString() + (income > 0 ? ' (' + ((ctx.raw / income) * 100).toFixed(1) + '%)' : '')
+          }
+        }
+      }
+    }
+  });
+}
+
+recalc();
+</script>
+</body>
+</html>
