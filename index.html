@@ -148,7 +148,9 @@
     margin: 14px 0;
   }
 
-  .content { display: flex; flex-direction: column; gap: 1.25rem; }
+  /* min-width:0 lets the column shrink below its content's intrinsic width
+     (the Chart.js canvas) instead of forcing horizontal page overflow */
+  .content { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
 
   .score-card {
     background: var(--surface);
@@ -199,6 +201,8 @@
     border: 0.5px solid var(--border);
     border-radius: var(--radius);
     padding: 1.25rem;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .chart-card h3 {
