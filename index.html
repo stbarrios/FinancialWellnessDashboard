@@ -86,18 +86,6 @@
     align-items: start;
   }
 
-  @media (max-width: 768px) {
-    .main-layout { grid-template-columns: 1fr; padding: 1rem; gap: 1rem; }
-    header { padding: 0 1rem; }
-    /* Sidebar stacks above content on mobile — sticky would pin it awkwardly */
-    .sidebar { position: static; top: auto; }
-    /* 16px prevents iOS Safari from auto-zooming the page on input focus */
-    .input-group input[type=number] { font-size: 16px; padding: 9px 11px; }
-    /* Let the ring and text stack so neither gets squeezed */
-    .score-card { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
-    .score-info p { max-width: none; }
-  }
-
   .sidebar {
     background: var(--surface);
     border: 0.5px solid var(--border);
@@ -280,6 +268,19 @@
     height: 100%;
     border-radius: 3px;
     transition: width 0.4s ease;
+  }
+
+  /* Mobile overrides — placed last so they win the cascade over the base rules above */
+  @media (max-width: 768px) {
+    .main-layout { grid-template-columns: 1fr; padding: 1rem; gap: 1rem; }
+    header { padding: 0 1rem; }
+    /* Not sticky on mobile: a tall pinned sidebar would let content scroll over it */
+    .sidebar { position: static; top: auto; }
+    /* 16px prevents iOS Safari from auto-zooming the page on input focus */
+    .input-group input[type=number] { font-size: 16px; padding: 9px 11px; }
+    /* Stack the ring above the text so neither gets squeezed */
+    .score-card { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
+    .score-info p { max-width: none; }
   }
 </style>
 </head>
