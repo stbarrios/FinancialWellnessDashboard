@@ -323,7 +323,8 @@
   .provider-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 
   .advisor-setup select,
-  .advisor-setup #model-input {
+  .advisor-setup #model-input,
+  .advisor-setup .endpoint-input {
     padding: 8px 10px;
     border: 0.5px solid var(--border-md);
     border-radius: var(--radius-sm);
@@ -336,8 +337,10 @@
 
   .advisor-setup select { cursor: pointer; }
   .advisor-setup #model-input { flex: 1; min-width: 120px; }
+  .advisor-setup .endpoint-input { width: 100%; margin-bottom: 8px; }
   .advisor-setup select:focus,
-  .advisor-setup #model-input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-bg); }
+  .advisor-setup #model-input:focus,
+  .advisor-setup .endpoint-input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-bg); }
 
   .advisor-btns {
     display: flex;
@@ -425,7 +428,8 @@
     .input-group input[type=number],
     .custom-ask input,
     .advisor-setup select,
-    .advisor-setup #model-input { font-size: 16px; }
+    .advisor-setup #model-input,
+    .advisor-setup .endpoint-input { font-size: 16px; }
     .input-group input[type=number] { padding: 9px 11px; }
     /* Stack the ring above the text so neither gets squeezed */
     .score-card { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
@@ -533,6 +537,7 @@
           <select id="provider-select" onchange="onProviderChange()" aria-label="AI provider"></select>
           <input type="text" id="model-input" placeholder="model (optional)" autocomplete="off" spellcheck="false">
         </div>
+        <input type="text" id="endpoint-input" class="endpoint-input" placeholder="https://YOUR-RESOURCE.openai.azure.com" autocomplete="off" spellcheck="false" style="display:none;">
         <div class="custom-ask">
           <input type="text" id="api-key-input" placeholder="API key…" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') saveKey()">
           <button onclick="saveKey()">Enable</button>
@@ -625,14 +630,16 @@ const PROVIDERS = {
     parse: d => d.choices?.[0]?.message?.content || ''
   },
 
-  github: {
-    label: 'GitHub Models (Copilot)', defaultModel: 'openai/gpt-4o-mini',
-    keyPlaceholder: 'github_pat_… or ghp_…', consoleName: 'github.com/settings/tokens',
-    consoleUrl: 'https://github.com/settings/tokens', cors: 'proxy',
-    build: (key, model, prompt) => ({
-      url: 'https://models.github.ai/inference/chat/completions',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: { model, max_tokens: 1000, messages: [{ role: 'user', content: prompt }] }
+  azure: {
+    label: 'Azure OpenAI (Microsoft)', defaultModel: 'gpt-4o-mini',
+    modelLabel: 'deployment name', keyPlaceholder: 'Azure resource key',
+    consoleName: 'portal.azure.com', consoleUrl: 'https://portal.azure.com',
+    cors: 'proxy', needsEndpoint: true,
+    endpointPlaceholder: 'https://YOUR-RESOURCE.openai.azure.com',
+    build: (key, model, prompt, endpoint) => ({
+      url: endpoint.replace(/\/+$/, '') + '/openai/deployments/' + model + '/chat/completions?api-version=2024-10-21',
+      headers: { 'Content-Type': 'application/json', 'api-key': key },
+      body: { max_tokens: 1000, messages: [{ role: 'user', content: prompt }] }
     }),
     parse: d => d.choices?.[0]?.message?.content || ''
   }
@@ -641,7 +648,7 @@ const PROVIDERS = {
 const CORS_NOTE = {
   ok: '',
   maybe: ' Browser-direct calls usually work but may be blocked by CORS.',
-  proxy: ' Note: there is no public Copilot API key — this uses GitHub Models with a GitHub token and will likely need a backend proxy (CORS).'
+  proxy: ' Note: Microsoft Copilot itself has no public API key — this uses your own Azure OpenAI resource (endpoint + deployment) and will likely need a backend proxy (CORS).'
 };
 
 // ── PROVIDER CONFIG ──────────────────────────────────────────────────────────
@@ -659,7 +666,8 @@ function getConfig() {
   return {
     provider: PROVIDERS[provider] ? provider : 'anthropic',
     key: localStorage.getItem('ai_api_key') || '',
-    model: localStorage.getItem('ai_model') || ''
+    model: localStorage.getItem('ai_model') || '',
+    endpoint: localStorage.getItem('ai_endpoint') || ''
   };
 }
 
@@ -673,27 +681,37 @@ function populateProviders() {
 function onProviderChange() {
   const p = PROVIDERS[document.getElementById('provider-select').value];
   document.getElementById('api-key-input').placeholder = p.keyPlaceholder;
-  document.getElementById('model-input').placeholder = 'model (default: ' + p.defaultModel + ')';
+  document.getElementById('model-input').placeholder = (p.modelLabel || 'model') + ' (default: ' + p.defaultModel + ')';
+  // The Azure endpoint field only applies to providers that need a resource URL
+  const ep = document.getElementById('endpoint-input');
+  ep.style.display = p.needsEndpoint ? 'block' : 'none';
+  if (p.needsEndpoint) ep.placeholder = p.endpointPlaceholder;
   document.getElementById('provider-note').innerHTML =
     'Get a key at <a href="' + p.consoleUrl + '" target="_blank" rel="noopener">' + p.consoleName + '</a>. Keep it private — never commit it into the page.' + CORS_NOTE[p.cors];
 }
 
 function saveKey() {
-  const provider = document.getElementById('provider-select').value;
+  const providerId = document.getElementById('provider-select').value;
+  const provider = PROVIDERS[providerId];
   const key = document.getElementById('api-key-input').value.trim();
   const model = document.getElementById('model-input').value.trim();
-  if (!key) { alert('Please paste an API key for ' + PROVIDERS[provider].label + '.'); return; }
-  localStorage.setItem('ai_provider', provider);
+  const endpoint = document.getElementById('endpoint-input').value.trim();
+  if (!key) { alert('Please paste an API key for ' + provider.label + '.'); return; }
+  if (provider.needsEndpoint && !endpoint) { alert('Please enter your Azure resource endpoint, e.g. ' + provider.endpointPlaceholder); return; }
+  localStorage.setItem('ai_provider', providerId);
   localStorage.setItem('ai_api_key', key);
   if (model) localStorage.setItem('ai_model', model); else localStorage.removeItem('ai_model');
+  if (provider.needsEndpoint) localStorage.setItem('ai_endpoint', endpoint); else localStorage.removeItem('ai_endpoint');
   document.getElementById('api-key-input').value = '';
   document.getElementById('model-input').value = '';
+  document.getElementById('endpoint-input').value = '';
   refreshAdvisorState();
 }
 
 function changeKey() {
   localStorage.removeItem('ai_api_key');
   localStorage.removeItem('ai_model');
+  localStorage.removeItem('ai_endpoint');
   refreshAdvisorState();
 }
 
@@ -894,7 +912,7 @@ async function askAI(question) {
   const prompt = `${buildContext()}\n\nQuestion: ${question}\n\nPlease give concise, actionable advice specific to my numbers. Be direct and practical. 3–5 short paragraphs max.`;
 
   try {
-    const req = provider.build(cfg.key, model, prompt);
+    const req = provider.build(cfg.key, model, prompt, cfg.endpoint);
     const response = await fetch(req.url, {
       method: 'POST',
       headers: req.headers,
